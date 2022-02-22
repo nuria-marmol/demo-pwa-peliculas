@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejercicio PWA películas</title>
+    <!-- Archivos para barra de progreso -->
+    <link rel="stylesheet" href="css/nprogress.css">
+    <!-- Bulma CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.3/css/bulma.min.css">
+    <script src="https://unpkg.com/vue@3"></script>
+    <script src="js/nprogress.js"></script>
+    <script defer src="js/main.js"></script>
+</head>
+<body>
+    <div class="container">
+        <main id="app">
+            <h1 class="title">Películas</h1>
+            <button class="button" @click="verFormulario = ! verFormulario">Añadir</button>
+            <form v-if="verFormulario">
+                <div class="field">
+                    <label class="label">Película</label>
+                    <div class="control">
+                        <input v-model="nuevoNombre" class="input" type="text" placeholder="Nombre de la película">
+                    </div>
+                </div>
+                <div class="field">
+                    <label class="label">Duración</label>
+                    <div class="control">
+                        <input v-model="nuevaDuracion" class="input" type="number" placeholder="Duración de la película">
+                    </div>
+                </div>
+                <div>
+                    <button class="button is-primary" @click.prevent="anyadirPelicula">Guardar</button>
+                </div>
+            </form>
+            <ul>
+                <!-- Botón dentro del li para que se muestre junto a cada elemento. Usaremos el id de cada elemento para borrarlo. -->
+                <li :ref="'pelicula-' + pelicula.id" v-for="pelicula in peliculas">
+                    <!-- Muestra el input para editar si la id se elige -->
+                    <input v-if="peliculasEditables == pelicula.id" v-model="editarNombre" class="input" type="text" placeholder="Nombre de la película">
+                    <span v-else> {{ pelicula.name }} </span>
+                    <input v-if="peliculasEditables == pelicula.id" v-model="editarDuracion" class="input" type="number" placeholder="Duración de la película">
+                    <span v-else> {{ pelicula.duration }} </span>
+                    <!-- Botón de editar -->
+                    <button v-if="peliculasEditables != pelicula.id" :disabled="isLoading" @click="verPelicula(pelicula.id)">Editar película</button>
+                    <!-- Botón de guardar -->
+                    <button @click="editarPelicula(pelicula.id)" v-else :disabled="isLoading" class="button">Guardar</button>
+                    <button :disabled="isLoading" @click="borrarPelicula(pelicula.id)" class="delete"></button></li>
+            </ul>
+        </main>
+    </div>
+</body>
+</html>
