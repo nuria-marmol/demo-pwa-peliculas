@@ -1,0 +1,3 @@
+.desenfoque {
+    filter: blur(.5rem);
+}

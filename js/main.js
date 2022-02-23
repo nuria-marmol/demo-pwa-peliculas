@@ -1,7 +1,9 @@
 const headers = {
     'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl5aWJ0bmlvbGRyemZ1d3FkYm9iIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NDU0Mzg0MTQsImV4cCI6MTk2MTAxNDQxNH0.MRHqlD-XVFfY2VAxxmKWu1_CENQKV6kWo6MSPc7xmBw',
     'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl5aWJ0bmlvbGRyemZ1d3FkYm9iIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NDU0Mzg0MTQsImV4cCI6MTk2MTAxNDQxNH0.MRHqlD-XVFfY2VAxxmKWu1_CENQKV6kWo6MSPc7xmBw',
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    // para el paginador
+    'Range': '0-9'
 }
 
 Vue.createApp({
@@ -20,14 +22,26 @@ Vue.createApp({
             // Para el botón de editar
             peliculasEditables: -1,
             editarNombre: "",
-            editarDuracion: ""
+            editarDuracion: "",
+            // Para paginador
+            pag: 1,
+            numeroResultadosPorPagina: 5
         }
     },
     methods: {
+        getHeaders() {
+            const rangoInicio = (this.pag - 1) * this.numeroResultadosPorPagina;
+            const rangoFinal = rangoInicio + this.numeroResultadosPorPagina;
+            // Clono headers
+            let headersNuevoRango = JSON.parse(JSON.stringify(headers));
+            // Modifico el rango
+            headersNuevoRango.Range = `${rangoInicio}-${rangoFinal}`;
+            return headersNuevoRango;
+        },
         // Simplemente leemos lo que ya hay en la base de datos y lo mostramos
         async obtenerPeliculas() {
             this.isLoading = true;
-            const fetchPeliculas = await fetch(`${this.urlApi}?select=*`, {headers});
+            const fetchPeliculas = await fetch(`${this.urlApi}?select=*`, {headers: this.getHeaders()});
             this.peliculas = await fetchPeliculas.json();
             this.isLoading = false;
         },
@@ -39,7 +53,7 @@ Vue.createApp({
             // Añadimos la película a la base de datos
             const fetchPeliculas = await fetch(this.urlApi,
                 {
-                    headers: headers,
+                    headers: this.getHeaders(),
                     method: "POST",
                     body: JSON.stringify({"name": this.nuevoNombre, "duration": this.nuevaDuracion})
                 }
@@ -55,7 +69,7 @@ Vue.createApp({
         async borrarPelicula(id) {
             const fetchPeliculas = await fetch(`${this.urlApi}?id=eq.${id}`,
                 {
-                    headers: headers,
+                    headers: this.getHeaders(),
                     method: "DELETE"
                 }
             );
@@ -79,7 +93,7 @@ Vue.createApp({
             this.peliculasEditables = -1;
             const fetchPeliculas = await fetch(`${this.urlApi}?id=eq.${id}`,
                 {
-                    headers: headers,
+                    headers: this.getHeaders(),
                     method: "PATCH",
                     body: JSON.stringify({"name": this.editarNombre, "duration": this.editarDuracion})
                 }
@@ -101,7 +115,7 @@ Vue.createApp({
             this.peliculasOmdb.forEach((pelicula) => {
                 fetch(this.urlApi,
                     {
-                        headers: headers,
+                        headers: this.getHeaders(),
                         method: "POST",
                         body: JSON.stringify({"name": pelicula.Title, "duration": 120})
                     }
@@ -119,6 +133,10 @@ Vue.createApp({
             } else {
                 NProgress.done();
             }
+        },
+        // Vuelve a mostrar las películas cuando cambiamos de página
+        pag(value) {
+            this.obtenerPeliculas();
         }
     },
     mounted() {
