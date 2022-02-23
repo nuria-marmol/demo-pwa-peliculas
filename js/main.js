@@ -9,6 +9,8 @@ Vue.createApp({
         return {
             // Metemos la ruta invariable de nuestra propia API creada con Supabase
             peliculas: [],
+            peliculasOmdb: [],
+            urlOmdb: "http://www.omdbapi.com/?apikey=8714c357&s=hombre",
             urlApi: "https://yyibtnioldrzfuwqdbob.supabase.co/rest/v1/películas",
             verFormulario: false,
             nuevoNombre: "",
@@ -84,6 +86,27 @@ Vue.createApp({
             );
             this.obtenerPeliculas();
             this.isLoading = false;
+        },
+        // Cogemos películas de otra API
+        async obtenerPeliculasOmdb() {
+            const miFetch = await fetch(this.urlOmdb);
+            const jsonData = await miFetch.json();
+            this.peliculasOmdb = jsonData.Search;
+            console.log(this.peliculasOmdb);
+            this.anyadirPeliculasOmdb();
+        },
+        // Publicamos esas películas en nuestra base de datos
+        anyadirPeliculasOmdb() {
+            // Añadimos la película a la base de datos
+            this.peliculasOmdb.forEach((pelicula) => {
+                fetch(this.urlApi,
+                    {
+                        headers: headers,
+                        method: "POST",
+                        body: JSON.stringify({"name": pelicula.Title, "duration": 120})
+                    }
+                );
+            })
         }
     },
     watch: {
@@ -100,5 +123,6 @@ Vue.createApp({
     },
     mounted() {
         this.obtenerPeliculas();
+        this.obtenerPeliculasOmdb();
     }
 }).mount('#app')
