@@ -52,7 +52,7 @@
                     <button :disabled="isLoading" @click="borrarPelicula(pelicula.id)" class="delete ml-1"></button></li>
             </ul>
             <div class="block">
-                <button v-if="pag > 1" class="button" @click="pag = pag - 1">Atrás</button>
+                <button v-if="pag > 1" class="button mr-2" @click="pag = pag - 1">Atrás</button>
                 <button v-if="pag < calcularNumeroPaginas()" class="button" @click="pag = pag + 1">Delante</button>
             </div>
         </main>

@@ -3,7 +3,7 @@ const headers = {
     'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl5aWJ0bmlvbGRyemZ1d3FkYm9iIiwicm9sZSI6ImFub24iLCJpYXQiOjE2NDU0Mzg0MTQsImV4cCI6MTk2MTAxNDQxNH0.MRHqlD-XVFfY2VAxxmKWu1_CENQKV6kWo6MSPc7xmBw',
     'Content-Type': 'application/json',
     // para el paginador
-    'Range': '0-9'
+    'Range': '0-99'
 }
 
 Vue.createApp({
@@ -40,9 +40,17 @@ Vue.createApp({
             const rangoFinal = rangoInicio + this.numeroResultadosPorPagina;
             // Clono headers
             let headersNuevoRango = JSON.parse(JSON.stringify(headers));
-            // Modifico el rango
-            headersNuevoRango.Range = `${rangoInicio}-${rangoFinal}`;
-            return headersNuevoRango;
+            // Modifico su rango
+            /* Como Range coge tanto el inicio como el final, NO como slice, necesitamos un condicional */
+            if (rangoInicio === 0) {
+                // Si no le restamos 1, nos cogería 6 elementos
+                headersNuevoRango.Range = `${rangoInicio}-${rangoFinal - 1}`;
+                return headersNuevoRango;
+            } else {
+                // Si no le sumamos 1, la siguiente pág. empieza por el último elemento de la anterior
+                headersNuevoRango.Range = `${rangoInicio + 1}-${rangoFinal}`;
+                return headersNuevoRango;
+            }
         },
         // Simplemente leemos lo que ya hay en la base de datos y lo mostramos
         async obtenerPeliculas() {
@@ -61,6 +69,7 @@ Vue.createApp({
                 {
                     headers: this.getHeaders(),
                     method: "POST",
+                    // Las claves de las columnas que teníamos en la tabla de nuestra base
                     body: JSON.stringify({"name": this.nuevoNombre, "duration": this.nuevaDuracion})
                 }
             );
