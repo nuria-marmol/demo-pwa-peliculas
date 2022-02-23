@@ -42,18 +42,18 @@
                 <li :ref="'pelicula-' + pelicula.id" v-for="pelicula in peliculas" :class="{'desenfoque': isLoading}">
                     <!-- Muestra el input para editar si la id se elige -->
                     <input v-if="peliculasEditables == pelicula.id" v-model="editarNombre" class="input" type="text" placeholder="Nombre de la película">
-                    <span v-else> {{ pelicula.name }} </span>
+                    <span v-else> {{ pelicula.name }} - </span>
                     <input v-if="peliculasEditables == pelicula.id" v-model="editarDuracion" class="input" type="number" placeholder="Duración de la película">
-                    <span v-else> {{ pelicula.duration }} </span>
+                    <span v-else> {{ pelicula.duration }} min</span>
                     <!-- Botón de editar -->
-                    <button v-if="peliculasEditables != pelicula.id" :disabled="isLoading" @click="verPelicula(pelicula.id)">Editar película</button>
+                    <button v-if="peliculasEditables != pelicula.id" :disabled="isLoading" @click="verPelicula(pelicula.id)" class="button is-small ml-2">Editar película</button>
                     <!-- Botón de guardar -->
-                    <button @click="editarPelicula(pelicula.id)" v-else :disabled="isLoading" class="button">Guardar</button>
-                    <button :disabled="isLoading" @click="borrarPelicula(pelicula.id)" class="delete"></button></li>
+                    <button @click="editarPelicula(pelicula.id)" v-else :disabled="isLoading" class="button is-small">Guardar</button>
+                    <button :disabled="isLoading" @click="borrarPelicula(pelicula.id)" class="delete ml-1"></button></li>
             </ul>
             <div class="block">
                 <button v-if="pag > 1" class="button" @click="pag = pag - 1">Atrás</button>
-                <button class="button" @click="pag = pag + 1">Delante</button>
+                <button v-if="pag < calcularNumeroPaginas()" class="button" @click="pag = pag + 1">Delante</button>
             </div>
         </main>
     </div>

@@ -12,7 +12,11 @@ Vue.createApp({
             // Metemos la ruta invariable de nuestra propia API creada con Supabase
             peliculas: [],
             peliculasOmdb: [],
+            // Para poner manualmente algunas duraciones
+            duracionesPeliculasOmdb: [120, 90, 150, 60],
+            // Si no añades page en el endpoint, devuelve la página 1 (solo 10 elementos siempre)
             urlOmdb: "http://www.omdbapi.com/?apikey=8714c357&s=hombre",
+            paginaUrlOmdb: "&page=",
             urlApi: "https://yyibtnioldrzfuwqdbob.supabase.co/rest/v1/películas",
             verFormulario: false,
             nuevoNombre: "",
@@ -25,7 +29,9 @@ Vue.createApp({
             editarDuracion: "",
             // Para paginador
             pag: 1,
-            numeroResultadosPorPagina: 5
+            numeroResultadosPorPagina: 5,
+            // Para calcular luego el núm. de páginas que hay
+            paginasTotales: 0
         }
     },
     methods: {
@@ -101,15 +107,22 @@ Vue.createApp({
             this.obtenerPeliculas();
             this.isLoading = false;
         },
-        // Cogemos películas de otra API
+        // Cogemos películas de otra API. Get
         async obtenerPeliculasOmdb() {
             const miFetch = await fetch(this.urlOmdb);
             const jsonData = await miFetch.json();
             this.peliculasOmdb = jsonData.Search;
             console.log(this.peliculasOmdb);
+            this.obtenerPeliculasSiguientesOmdb();
+        },
+        async obtenerPeliculasSiguientesOmdb() {
+            const miFetch = await fetch(`${this.urlOmdb}${this.paginaUrlOmdb}2`);
+            const jsonData = await miFetch.json();
+            this.peliculasOmdb = this.peliculasOmdb.concat(jsonData.Search);
+            console.log(this.peliculasOmdb);
             this.anyadirPeliculasOmdb();
         },
-        // Publicamos esas películas en nuestra base de datos
+        // Publicamos esas películas en nuestra base de datos. Post
         anyadirPeliculasOmdb() {
             // Añadimos la película a la base de datos
             this.peliculasOmdb.forEach((pelicula) => {
@@ -117,10 +130,18 @@ Vue.createApp({
                     {
                         headers: this.getHeaders(),
                         method: "POST",
-                        body: JSON.stringify({"name": pelicula.Title, "duration": 120})
+                        body: JSON.stringify({"name": pelicula.Title, "duration": this.cogerDuracionRandomPeliculaOmdb()})
                     }
                 );
             })
+        },
+        cogerDuracionRandomPeliculaOmdb() {
+            const duracion =  this.duracionesPeliculasOmdb[Math.floor(Math.random()*this.duracionesPeliculasOmdb.length)];
+            return duracion;
+        },
+        calcularNumeroPaginas() {
+            this.paginasTotales = Math.ceil(this.peliculasOmdb.length / this.numeroResultadosPorPagina);
+            return this.paginasTotales;
         }
     },
     watch: {
