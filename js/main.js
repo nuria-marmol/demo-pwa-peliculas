@@ -15,7 +15,7 @@ Vue.createApp({
             // Para poner manualmente algunas duraciones
             duracionesPeliculasOmdb: [120, 90, 150, 60],
             // Si no añades page en el endpoint, devuelve la página 1 (solo 10 elementos siempre)
-            urlOmdb: "http://www.omdbapi.com/?apikey=8714c357&s=hombre",
+            urlOmdb: "https://www.omdbapi.com/?apikey=8714c357&s=hombre",
             urlApi: "https://yyibtnioldrzfuwqdbob.supabase.co/rest/v1/películas",
             verFormulario: false,
             nuevoNombre: "",
@@ -31,6 +31,12 @@ Vue.createApp({
             numeroResultadosPorPagina: 5,
             // Para calcular luego el núm. de páginas que hay
             paginasTotales: 0
+        }
+    },
+    computed: {
+        calcularNumeroPaginas: function() {
+            // Previamente this.paginasTotales = ... Después return de esta variable.
+            return Math.ceil(this.peliculasOmdb.length / this.numeroResultadosPorPagina);
         }
     },
     methods: {
@@ -146,11 +152,6 @@ Vue.createApp({
         cogerDuracionRandomPeliculaOmdb: function() {
             const duracion =  this.duracionesPeliculasOmdb[Math.floor(Math.random()*this.duracionesPeliculasOmdb.length)];
             return duracion;
-        },
-        // Esta función puede estar en un computed mejor
-        calcularNumeroPaginas: function() {
-            // Previamente this.paginasTotales = ... Después return de esta variable.
-            return Math.ceil(this.peliculasOmdb.length / this.numeroResultadosPorPagina);
         }
     },
     watch: {

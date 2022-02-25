@@ -54,7 +54,7 @@
             <div class="block">
                 <p> Página {{ pag }} </p>
                 <button :disabled="isLoading" v-if="pag > 1" class="button mr-2" @click="pag = pag - 1">Atrás</button>
-                <button :disabled="isLoading" v-if="pag < calcularNumeroPaginas()" class="button" @click="pag = pag + 1">Delante</button>
+                <button :disabled="isLoading" v-if="pag < calcularNumeroPaginas" class="button" @click="pag = pag + 1">Delante</button>
             </div>
         </main>
     </div>
