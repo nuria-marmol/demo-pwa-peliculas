@@ -16,7 +16,6 @@ Vue.createApp({
             duracionesPeliculasOmdb: [120, 90, 150, 60],
             // Si no añades page en el endpoint, devuelve la página 1 (solo 10 elementos siempre)
             urlOmdb: "http://www.omdbapi.com/?apikey=8714c357&s=hombre",
-            paginaUrlOmdb: "&page=",
             urlApi: "https://yyibtnioldrzfuwqdbob.supabase.co/rest/v1/películas",
             verFormulario: false,
             nuevoNombre: "",
@@ -118,21 +117,21 @@ Vue.createApp({
         },
         // Cogemos películas de otra API. Get
         async obtenerPeliculasOmdb() {
-            const miFetch = await fetch(this.urlOmdb);
-            const jsonData = await miFetch.json();
-            this.peliculasOmdb = jsonData.Search;
-            console.log(this.peliculasOmdb);
-            this.obtenerPeliculasSiguientesOmdb();
-        },
-        async obtenerPeliculasSiguientesOmdb() {
-            const miFetch = await fetch(`${this.urlOmdb}${this.paginaUrlOmdb}2`);
-            const jsonData = await miFetch.json();
-            this.peliculasOmdb = this.peliculasOmdb.concat(jsonData.Search);
-            console.log(this.peliculasOmdb);
-            this.anyadirPeliculasOmdb();
+            // Como solo devuelve 10 elementos por página y queremos 100 películas:
+            for (let i = 1; i <= 10; i += 1) {
+                const miFetch = await fetch(`${this.urlOmdb}&page=${i}`);
+                const jsonData = await miFetch.json();
+                // Vamos metiendo los resultados de cada pág. en nuestro array
+                this.peliculasOmdb = this.peliculasOmdb.concat(jsonData.Search);
+                console.log(this.peliculasOmdb);
+                // Cuando ya tenemos las 100 películas, llamamos a la siguiente función
+                if (this.peliculasOmdb.length === 100) {
+                    this.anyadirPeliculasOmdb();
+                }
+            }
         },
         // Publicamos esas películas en nuestra base de datos. Post
-        anyadirPeliculasOmdb() {
+        async anyadirPeliculasOmdb() {
             // Añadimos la película a la base de datos
             this.peliculasOmdb.forEach((pelicula) => {
                 fetch(this.urlApi,
@@ -149,8 +148,7 @@ Vue.createApp({
             return duracion;
         },
         calcularNumeroPaginas() {
-            this.paginasTotales = Math.ceil(this.peliculasOmdb.length / this.numeroResultadosPorPagina);
-            return this.paginasTotales;
+            return Math.ceil(this.peliculasOmdb.length / this.numeroResultadosPorPagina);
         }
     },
     watch: {
