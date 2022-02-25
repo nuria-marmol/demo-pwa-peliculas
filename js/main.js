@@ -34,7 +34,7 @@ Vue.createApp({
         }
     },
     methods: {
-        getHeaders() {
+        getHeaders: function() {
             const rangoInicio = (this.pag - 1) * this.numeroResultadosPorPagina;
             const rangoFinal = rangoInicio + this.numeroResultadosPorPagina;
             // Clono headers
@@ -52,14 +52,14 @@ Vue.createApp({
             }
         },
         // Simplemente leemos lo que ya hay en la base de datos y lo mostramos
-        async obtenerPeliculas() {
+        obtenerPeliculas: async function() {
             this.isLoading = true;
             const fetchPeliculas = await fetch(`${this.urlApi}?select=*`, {headers: this.getHeaders()});
             this.peliculas = await fetchPeliculas.json();
             this.isLoading = false;
         },
         // El usuario puede añadir una nueva. Modifica la base de datos. Post
-        async anyadirPelicula() {
+        anyadirPelicula: async function() {
             this.isLoading = true;
             // Ocultamos el formulario
             this.verFormulario = false;
@@ -80,7 +80,7 @@ Vue.createApp({
             this.isLoading = false;
         },
         // Borramos de la base de datos. Delete
-        async borrarPelicula(id) {
+        borrarPelicula: async function(id) {
             const fetchPeliculas = await fetch(`${this.urlApi}?id=eq.${id}`,
                 {
                     headers: this.getHeaders(),
@@ -90,7 +90,7 @@ Vue.createApp({
             this.obtenerPeliculas();
         },
         // Añadimos la película al set
-        verPelicula(id) {
+        verPelicula: function(id) {
             this.peliculasEditables = id;
             // Obtenemos la info del JSON
             const peliculaAEditar = this.peliculas.filter(function(pelicula) {
@@ -102,7 +102,7 @@ Vue.createApp({
             this.editarDuracion = peliculaAEditar.duration;
         },
         // Para editar al pulsar el botón. Post
-        async editarPelicula(id) {
+        editarPelicula: async function(id) {
             this.isLoading = true;
             this.peliculasEditables = -1;
             const fetchPeliculas = await fetch(`${this.urlApi}?id=eq.${id}`,
@@ -116,7 +116,7 @@ Vue.createApp({
             this.isLoading = false;
         },
         // Cogemos películas de otra API. Get
-        async obtenerPeliculasOmdb() {
+        obtenerPeliculasOmdb: async function() {
             // Como solo devuelve 10 elementos por página y queremos 100 películas:
             for (let i = 1; i <= 10; i += 1) {
                 const miFetch = await fetch(`${this.urlOmdb}&page=${i}`);
@@ -131,7 +131,7 @@ Vue.createApp({
             }
         },
         // Publicamos esas películas en nuestra base de datos. Post
-        async anyadirPeliculasOmdb() {
+        anyadirPeliculasOmdb: function() {
             // Añadimos la película a la base de datos
             this.peliculasOmdb.forEach((pelicula) => {
                 fetch(this.urlApi,
@@ -143,11 +143,13 @@ Vue.createApp({
                 );
             })
         },
-        cogerDuracionRandomPeliculaOmdb() {
+        cogerDuracionRandomPeliculaOmdb: function() {
             const duracion =  this.duracionesPeliculasOmdb[Math.floor(Math.random()*this.duracionesPeliculasOmdb.length)];
             return duracion;
         },
-        calcularNumeroPaginas() {
+        // Esta función puede estar en un computed mejor
+        calcularNumeroPaginas: function() {
+            // Previamente this.paginasTotales = ... Después return de esta variable.
             return Math.ceil(this.peliculasOmdb.length / this.numeroResultadosPorPagina);
         }
     },
@@ -165,6 +167,7 @@ Vue.createApp({
         // Vuelve a mostrar las películas cuando cambiamos de página
         pag(value) {
             this.obtenerPeliculas();
+            this.peliculasOmdb.length;
         }
     },
     mounted() {
